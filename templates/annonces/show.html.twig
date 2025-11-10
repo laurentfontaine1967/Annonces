@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+{% block title %}Annonce #{{ annonce.id }}{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <style>
+    .page-bg{min-height:100vh;background:linear-gradient(120deg,#6ea8fe,#c29ffa,#f7a9a8,#ffd08a);background-size:300% 300%;animation:bgShift 16s ease infinite}
+    @keyframes bgShift{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+    .glass{backdrop-filter:blur(12px);background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);box-shadow:0 22px 44px rgba(0,0,0,.18);border-radius:1.2rem;overflow:hidden}
+    .card-hero{padding:1.3rem 1.5rem;background:radial-gradient(60% 120% at 10% 0%,rgba(255,255,255,.35),rgba(255,255,255,.08))}
+    .brand-badge{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:700;background:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.6)}
+    .cover-wrapper{text-align:center;background:#f8f9fa;border-bottom:1px solid rgba(0,0,0,.06);padding:1rem 0;}
+    .cover{max-width:600px;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:.8rem;border:1px solid rgba(0,0,0,.08);}
+    .meta th{width:160px;white-space:nowrap;color:#6c757d}
+    .price{font-weight:700}
+    .btn-soft{background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.08)}
+  </style>
+{% endblock %}
+
+{% block body %}
+  <div class="page-bg py-5">
+    <div class="container" style="max-width: 1000px;">
+
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 text-white">
+        <div>
+          <h1 class="h3 mb-0">Annonce #{{ annonce.id }}</h1>
+          <div class="text-white-50 small">Détails de l’annonce</div>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{{ path('app_annonces_index') }}" class="btn btn-light btn-soft">← Retour à la liste</a>
+          <a href="{{ path('app_annonces_edit', {'id': annonce.id}) }}" class="btn btn-primary">✏️ Modifier</a>
+          <div>
+            {{ include('annonces/_delete_form.html.twig') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="card-hero d-flex align-items-center justify-content-between">
+          <div>
+            <h2 class="h5 mb-0">{{ annonce.titre }}</h2>
+            <div class="text-muted small">ID : {{ annonce.id }}</div>
+          </div>
+          <div class="brand-badge">✦</div>
+        </div>
+
+        {# Image réduite et centrée #}
+        <div class="cover-wrapper">
+          {% if annonce.imageName %}
+            <img
+              class="cover"
+              src="{{ asset('uploads/annonces/' ~ annonce.imageName) }}"
+              alt="Photo de {{ annonce.titre }}"
+              loading="lazy"
+              onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,{{ '<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22450%22><rect width=%22600%22 height=%22450%22 rx=%2212%22 fill=%22%23e9ecef%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2218%22 fill=%22%236c757d%22>image manquante</text></svg>'|e('url') }}';"
+            >
+          {% else %}
+            <img
+              class="cover"
+              src="data:image/svg+xml;utf8,{{ '<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22450%22><rect width=%22600%22 height=%22450%22 rx=%2212%22 fill=%22%23e9ecef%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2218%22 fill=%22%236c757d%22>aucune image</text></svg>'|e('url') }}"
+              alt="Aucune image"
+            >
+          {% endif %}
+        </div>
+
+        <div class="p-4 p-lg-5">
+          <div class="row g-4">
+            <div class="col-12 col-lg-7">
+              <h3 class="h5 mb-3">Description</h3>
+              <p class="mb-4">{{ annonce.description }}</p>
+            </div>
+            <div class="col-12 col-lg-5">
+              <h3 class="h6 mb-3 text-muted">Informations</h3>
+              <table class="table meta align-middle mb-4">
+                <tbody>
+                  <tr>
+                    <th>Identifiant</th>
+                    <td>{{ annonce.id }}</td>
+                  </tr>
+                  <tr>
+                    <th>Titre</th>
+                    <td>{{ annonce.titre }}</td>
+                  </tr>
+                  <tr>
+                    <th>Prix</th>
+                    <td class="price">
+                      {% if annonce.prix is not null %}
+                        {{ annonce.prix|number_format(2, ',', ' ') }} €
+                      {% else %}
+                        <span class="text-muted">N/C</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% if annonce.user is defined and annonce.user %}
+                    <tr>
+                      <th>Vendeur</th>
+                      <td>{{ annonce.user.email ?? annonce.user.userIdentifier ?? '—' }}</td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+
+              <div class="d-flex gap-2">
+                <a href="{{ path('app_annonces_edit', {'id': annonce.id}) }}" class="btn btn-primary w-100">Modifier</a>
+                <a href="{{ path('app_annonces_index') }}" class="btn btn-outline-secondary w-100">Retour</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <a href="{{ path('app_annonces_index') }}" class="btn btn-outline-light">← Retour</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const delForm = document.querySelector('form[action*="delete"]') || document.querySelector('form[action*="_delete"]');
+      if(delForm){
+        const btn = delForm.querySelector('button, input[type="submit"]');
+        if(btn){ btn.classList.add('btn','btn-danger'); }
+      }
+    })();
+  </script>
+{% endblock %}

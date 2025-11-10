@@ -1,0 +1,106 @@
+{# templates/annonces/_form.html.twig #}
+{# Logique conservée : même structure / mêmes champs, mais "Photo" pointe sur imageFile #}
+
+<style>
+  :root{
+    --bg:#0f1220;--card:#14182b;--muted:#99a3b3;--text:#e9ecf1;--accent1:#7c5cff;--accent2:#22d1ee;
+    --radius:16px;--radius-sm:12px;--shadow:0 22px 60px rgba(0,0,0,.45),0 3px 10px rgba(0,0,0,.25)
+  }
+  .form-shell{margin:0 auto;max-width:860px}
+  .cardx{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;color:var(--text)}
+  .cardx-header{padding:1.25rem 1.5rem;background:
+    radial-gradient(120% 120% at -10% -10%,rgba(124,92,255,.28),transparent 60%),
+    radial-gradient(120% 120% at 110% -10%,rgba(34,209,238,.18),transparent 60%),rgba(255,255,255,.02);
+    border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between}
+  .cardx-body{padding:1.5rem}
+  .grid{display:grid;gap:1.25rem}
+  @media (min-width:768px){.grid-2{grid-template-columns:1fr 1fr}}
+  .fx-label{display:block;margin-bottom:.45rem;font-size:.95rem;color:var(--muted)}
+  .fx-input,.fx-textarea,.fx-select,.fx-file{width:100%;border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.04);color:var(--text);border-radius:var(--radius-sm);padding:.85rem 1rem;outline:none;
+    transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
+  .fx-textarea{min-height:140px;resize:vertical}
+  .fx-input:focus,.fx-textarea:focus,.fx-select:focus{border-color:rgba(124,92,255,.6);box-shadow:0 0 0 4px rgba(124,92,255,.18);background:rgba(255,255,255,.06)}
+  .fx-group{position:relative;display:flex;align-items:center}
+  .fx-addon{margin-left:.6rem;padding:.6rem .7rem;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:var(--muted);font-weight:600}
+  .file-wrap{position:relative}
+  .fx-file{padding:.75rem;cursor:pointer}
+  .file-hint{font-size:.9rem;color:var(--muted);margin-top:.35rem}
+  .fx-error{color:#ff92a6;font-size:.9rem;margin-top:.35rem}
+  .actions{display:flex;gap:.8rem;margin-top:.3rem}
+  .btn-main{border:0;border-radius:12px;padding:.9rem 1.15rem;font-weight:600;color:#fff;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));box-shadow:0 14px 30px rgba(124,92,255,.35);
+    transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+  .btn-main:hover{transform:translateY(-1px);filter:brightness(1.05);box-shadow:0 18px 36px rgba(124,92,255,.45)}
+  .btn-ghost{border:1px solid rgba(255,255,255,.18);background:transparent;color:var(--text);border-radius:12px;padding:.9rem 1.15rem}
+  body{background:radial-gradient(100% 120% at 0% 0%,#151a2e,#0f1220)}
+</style>
+
+{{ form_start(form, { attr: { class: 'form-shell' } }) }}
+  <div class="cardx">
+    <div class="cardx-header">
+      <div>
+        <div style="font-weight:700">Nouvelle annonce</div>
+        <div style="color:var(--muted);font-size:.9rem;">Titre, description, prix…</div>
+      </div>
+      <div style="width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)">✦</div>
+    </div>
+
+    <div class="cardx-body">
+      <div class="grid">
+        {# Titre #}
+        <div>
+          <label class="fx-label">{{ form_label(form.titre) }}</label>
+          {{ form_widget(form.titre, { attr: { class: 'fx-input', placeholder: 'Titre de votre annonce' } }) }}
+          {{ form_errors(form.titre) ? '<div class="fx-error">' ~ form_errors(form.titre) ~ '</div>'|raw }}
+        </div>
+
+        {# Description #}
+        <div>
+          <label class="fx-label">{{ form_label(form.description, 'Description') }}</label>
+          {{ form_widget(form.description, { attr: { class: 'fx-textarea', placeholder: 'Décrivez précisément l’article' } }) }}
+          <div class="file-hint">Soyez précis : état, taille, localisation, etc.</div>
+          {{ form_errors(form.description) ? '<div class="fx-error">' ~ form_errors(form.description) ~ '</div>'|raw }}
+        </div>
+
+        <div class="grid grid-2">
+          {# Prix #}
+          <div>
+            <label class="fx-label">Prix</label>
+            <div class="fx-group">
+              {{ form_widget(form.prix, { attr: { class: 'fx-input', step: '0.01', min: '0', placeholder: '0,00' } }) }}
+              <span class="fx-addon">€</span>
+            </div>
+            {{ form_errors(form.prix) ? '<div class="fx-error">' ~ form_errors(form.prix) ~ '</div>'|raw }}
+          </div>
+
+          {# User (si présent dans le FormType) #}
+          {% if form.user is defined %}
+            <div>
+              <label class="fx-label">{{ form_label(form.user, 'Utilisateur') }}</label>
+              {{ form_widget(form.user, { attr: { class: 'fx-select' } }) }}
+              {{ form_errors(form.user) ? '<div class="fx-error">' ~ form_errors(form.user) ~ '</div>'|raw }}
+            </div>
+          {% endif %}
+        </div>
+
+        {# Photo (Vich) — utiliser imageFile, pas imageName #}
+        <div>
+          <label class="fx-label">{{ form_label(form.imageFile, 'Photo (jpg, png, webp)') }}</label>
+          <div class="file-wrap">
+            {{ form_widget(form.imageFile, { attr: { class: 'fx-file', accept: 'image/*' } }) }}
+          </div>
+          <div class="file-hint">Taille max 5 Mo. Formats acceptés : JPG, PNG, WEBP.</div>
+          {{ form_errors(form.imageFile) ? '<div class="fx-error">' ~ form_errors(form.imageFile) ~ '</div>'|raw }}
+        </div>
+
+        {# Actions #}
+        <div class="actions">
+          <button type="submit" class="btn-main">Save</button>
+          <a href="{{ path('app_annonces_index') }}" class="btn-ghost">Annuler</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{{ form_end(form) }}

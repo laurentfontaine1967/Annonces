@@ -1,0 +1,60 @@
+{# templates/annonces/_form.html.twig #}
+{% form_theme form 'bootstrap_5_layout.html.twig' %}
+
+<style>
+  .form-card {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 1rem;
+    box-shadow: 0 18px 42px rgba(0,0,0,0.25);
+    padding: 2rem 1.8rem;
+    color: #fff;
+  }
+  .form-card label {
+    font-weight: 600;
+    margin-bottom: .35rem;
+    color: #f1f3f6;
+  }
+  .form-card .form-control, 
+  .form-card .form-select {
+    border-radius: .8rem;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+  }
+  .form-card .form-control:focus {
+    border-color: #b889ff;
+    box-shadow: 0 0 0 4px rgba(124,92,255,.35);
+    background: rgba(255,255,255,0.12);
+  }
+  .btn-glow {
+    border: none;
+    border-radius: .9rem;
+    padding: .8rem 1.2rem;
+    font-weight: 600;
+    background: linear-gradient(135deg,#6f7afe,#b36bff);
+    color: #fff;
+    box-shadow: 0 12px 24px rgba(111,122,254,0.35);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .btn-glow:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+    box-shadow: 0 16px 30px rgba(111,122,254,0.45);
+  }
+</style>
+
+<div class="form-card">
+  {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+    {{ form_errors(form) }}
+
+    {{ form_widget(form) }}
+
+    <div class="text-center mt-4">
+      <button class="btn-glow">
+        {{ button_label|default('Save') }}
+      </button>
+    </div>
+  {{ form_end(form) }}
+</div>

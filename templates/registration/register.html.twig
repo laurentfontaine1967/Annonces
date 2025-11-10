@@ -1,0 +1,239 @@
+{% extends 'base.html.twig' %}
+{% form_theme registrationForm 'bootstrap_5_layout.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <style>
+    /* Fond dégradé animé */
+    .auth-bg {
+      min-height: 100vh;
+      background: linear-gradient(120deg, #6ea8fe, #c29ffa, #f7a9a8, #ffd08a);
+      background-size: 300% 300%;
+      animation: bgShift 16s ease infinite;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    @keyframes bgShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Carte vitrée */
+    .glass {
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      border-radius: 1.25rem;
+      overflow: hidden;
+    }
+
+    /* Header carte */
+    .card-hero {
+      background: radial-gradient(60% 120% at 20% 0%, rgba(255,255,255,0.35), rgba(255,255,255,0.1));
+      padding: 1.5rem 1.75rem;
+    }
+
+    .brand-badge {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: grid; place-items: center;
+      background: rgba(255,255,255,0.35);
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08) inset;
+      font-weight: 700;
+    }
+
+    /* Bouton principal glossy */
+    .btn-glow {
+      position: relative; border: 0; color: #fff;
+      background: linear-gradient(135deg,#6f7afe,#b36bff);
+      padding: 0.9rem 1.1rem; border-radius: 0.9rem;
+      box-shadow: 0 12px 24px rgba(111,122,254,0.35);
+      transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    }
+    .btn-glow:hover { transform: translateY(-2px); filter: brightness(1.05);
+      box-shadow: 0 16px 28px rgba(111,122,254,0.45);
+    }
+    .btn-glow:active { transform: translateY(0); }
+
+    /* Toggle œil mot de passe */
+    .pw-wrap { position: relative; }
+    .pw-toggle {
+      position: absolute; right: .6rem; top: 50%; transform: translateY(-50%);
+      border: 0; background: transparent; padding: .25rem .5rem; cursor: pointer;
+      opacity: .75;
+    }
+    .pw-toggle:hover { opacity: 1; }
+
+    /* Barre de robustesse */
+    .strength {
+      height: 8px; border-radius: 999px; background: rgba(255,255,255,0.35);
+      overflow: hidden; margin-top: .5rem;
+    }
+    .strength > div {
+      height: 100%; width: 0%;
+      transition: width .25s ease;
+      background: linear-gradient(90deg,#ff7676,#fecd57,#7ad46a,#35c0ff);
+    }
+    .hint { font-size: .85rem; opacity: .85; }
+
+    /* Petites finitions */
+    .form-floating label { color: rgba(0,0,0,.6); }
+    .list-check li { margin-bottom: .35rem; }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <div class="auth-bg">
+    <div class="container" style="max-width: 920px;">
+      <div class="row g-4 align-items-stretch">
+        <!-- Colonne gauche : pitch -->
+        <div class="col-12 col-lg-5 d-none d-lg-block">
+          <div class="glass h-100 p-4">
+            <div class="d-flex align-items-center gap-3 card-hero rounded-3 mb-3">
+              <div class="brand-badge">LF</div>
+              <div>
+                <h2 class="h4 mb-0">Rejoignez-nous</h2>
+                <div class="text-muted small">Créez votre compte en 1 minute</div>
+              </div>
+            </div>
+
+            <ul class="list-unstyled list-check mb-4">
+              <li>✅ Sécurité renforcée et confidentialité</li>
+              <li>✅ Accès rapide à votre espace</li>
+              <li>✅ Support réactif</li>
+            </ul>
+
+            <div class="hint">
+              Astuce : utilisez un <strong>mot de passe long</strong> avec des lettres, chiffres et symboles.
+            </div>
+          </div>
+        </div>
+
+        <!-- Colonne droite : formulaire -->
+        <div class="col-12 col-lg-7">
+          <div class="glass">
+            <div class="card-hero d-flex align-items-center justify-content-between">
+              <div>
+                <h1 class="h4 mb-1">Créer un compte</h1>
+                <div class="text-muted small">Remplissez les champs ci-dessous</div>
+              </div>
+              <div class="brand-badge">✦</div>
+            </div>
+
+            <div class="p-4 p-lg-5">
+              {{ form_errors(registrationForm) }}
+
+              {{ form_start(registrationForm, { attr: { class: 'needs-validation', novalidate: 'novalidate' } }) }}
+
+              <!-- Email -->
+              <div class="mb-4 form-floating">
+                {{ form_widget(registrationForm.email, {
+                  attr: { placeholder: 'name@example.com', class: 'form-control' }
+                }) }}
+                {{ form_label(registrationForm.email, 'Email', { label_attr: { class: 'form-label' } }) }}
+                {{ form_errors(registrationForm.email) }}
+              </div>
+
+              <!-- Mot de passe avec toggle + jauge -->
+              <div class="mb-2">
+                <label class="form-label">Password</label>
+                <div class="pw-wrap">
+                  {{ form_widget(registrationForm.plainPassword, {
+                    attr: { autocomplete: 'new-password', class: 'form-control', 'data-pw':'input' }
+                  }) }}
+                  <button type="button" class="pw-toggle" aria-label="Afficher/masquer le mot de passe" data-pw="toggle">
+                    👁️
+                  </button>
+                </div>
+                {{ form_errors(registrationForm.plainPassword) }}
+                <div class="strength" aria-hidden="true"><div data-pw="bar"></div></div>
+                <div class="hint mt-2" data-pw="hint">Conseil : 12+ caractères, majuscules, chiffres et symboles.</div>
+              </div>
+
+              <!-- CGU -->
+              <div class="mb-4">
+                {{ form_row(registrationForm.agreeTerms) }}
+              </div>
+
+              <button type="submit" class="btn btn-glow w-100">
+                Créer mon compte
+              </button>
+
+              {{ form_end(registrationForm) }}
+
+              <p class="text-center mt-4 mb-0">
+                <span class="text-muted">Déjà inscrit ?</span>
+                <a href="{{ path('app_login') }}" class="fw-semibold text-decoration-none">Se connecter</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    // Validation Bootstrap
+    (function () {
+      const forms = document.querySelectorAll('.needs-validation');
+      Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (!form.checkValidity()) { event.preventDefault(); event.stopPropagation(); }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    })();
+
+    // Toggle & force feedback mot de passe (sélecteurs data-pw pour rester robustes)
+    (function(){
+      const input = document.querySelector('[data-pw="input"]');
+      const toggle = document.querySelector('[data-pw="toggle"]');
+      const bar = document.querySelector('[data-pw="bar"]');
+      const hint = document.querySelector('[data-pw="hint"]');
+
+      if (!input) return;
+
+      // Toggle visibilité
+      if (toggle) {
+        toggle.addEventListener('click', () => {
+          input.type = (input.type === 'password') ? 'text' : 'password';
+        });
+      }
+
+      // Estimation simple de robustesse
+      const score = (v) => {
+        let s = 0;
+        if (v.length >= 8) s++;
+        if (v.length >= 12) s++;
+        if (/[A-Z]/.test(v)) s++;
+        if (/\d/.test(v)) s++;
+        if (/[^A-Za-z0-9]/.test(v)) s++;
+        return Math.min(s, 5);
+      };
+
+      const labels = [
+        "Très faible",
+        "Faible",
+        "Moyenne",
+        "Bonne",
+        "Excellente"
+      ];
+
+      input.addEventListener('input', () => {
+        const s = score(input.value);
+        const pct = (s / 5) * 100;
+        if (bar) bar.style.width = pct + '%';
+        if (hint) hint.textContent = input.value.length
+          ? 'Robustesse : ' + labels[Math.max(0, s-1)]
+          : 'Conseil : 12+ caractères, majuscules, chiffres et symboles.';
+      });
+    })();
+  </script>
+{% endblock %}

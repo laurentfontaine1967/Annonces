@@ -1,0 +1,193 @@
+{% extends 'base.html.twig' %}
+{% block title %}Annonces index{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <style>
+    .page-bg{min-height:100vh;background:linear-gradient(120deg,#6ea8fe,#c29ffa,#f7a9a8,#ffd08a);background-size:300% 300%;animation:bgShift 16s ease infinite}
+    @keyframes bgShift{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+    .glass{backdrop-filter:blur(12px);background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);box-shadow:0 22px 44px rgba(0,0,0,.18);border-radius:1.2rem}
+    .toolbar .form-control{border-radius:.9rem}
+    .badge-price{font-weight:700}
+    .table thead th{position:sticky;top:0;background:rgba(255,255,255,.75);backdrop-filter:blur(6px)}
+    .action-btn{display:inline-flex;align-items:center;gap:.35rem}
+    .empty{padding:3rem 1rem;text-align:center;color:#6c757d}
+    .thumb{
+      width:64px;height:64px;object-fit:cover;border-radius:.6rem;border:1px solid rgba(0,0,0,.08);
+      background:#f8f9fa;
+    }
+    .thumb-cell{width:88px}
+  </style>
+{% endblock %}
+
+{% block body %}
+  <div class="page-bg py-5">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+          <h1 class="h3 mb-0 text-white">Annonces</h1>
+          <div class="text-white-50 small">Liste des annonces disponibles</div>
+        </div>
+        <a href="{{ path('app_annonces_new') }}" class="btn btn-light fw-semibold">
+          ➕ Créer une annonce
+        </a>
+      </div>
+
+      <div class="glass p-3 p-lg-4">
+        <!-- Toolbar -->
+        <div class="row g-2 align-items-center toolbar mb-3">
+          <div class="col-12 col-md-6">
+            <input id="searchInput" type="search" class="form-control" placeholder="Rechercher par titre ou description…">
+          </div>
+          <div class="col-6 col-md-3">
+            <select id="sortSelect" class="form-select">
+              <option value="">Tri…</option>
+              <option value="prix_asc">Prix ↑</option>
+              <option value="prix_desc">Prix ↓</option>
+              <option value="titre_asc">Titre A→Z</option>
+              <option value="titre_desc">Titre Z→A</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3 text-md-end">
+            <span class="text-muted small"><span id="countVisible"></span></span>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table align-middle table-hover mb-0" id="annoncesTable">
+            <thead>
+              <tr>
+                <th class="thumb-cell">Photo</th>
+                <th style="width:80px">Id</th>
+                <th style="min-width:200px">Titre</th>
+                <th>Description</th>
+                <th style="width:160px">Prix</th>
+                <th style="width:160px" class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for annonce in annonces %}
+              {# data-* pour la recherche/tri sans dépendre de l'ordre des colonnes #}
+              {% set prixNum = annonce.prix is not null ? annonce.prix : 0 %}
+              <tr
+                data-titre="{{ annonce.titre|lower }}"
+                data-description="{{ annonce.description|lower }}"
+                data-prix="{{ prixNum }}"
+              >
+                <td>
+                  {% if annonce.imageName %}
+                    <img
+                      class="thumb"
+                      src="{{ asset('uploads/annonces/' ~ annonce.imageName) }}"
+                      alt="Photo de {{ annonce.titre }}"
+                      loading="lazy"
+                      onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,{{ '<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect width=%2264%22 height=%2264%22 rx=%2210%22 fill=%22%23e9ecef%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2210%22 fill=%22%236c757d%22>no img</text></svg>'|e('url') }}';"
+                    >
+                  {% else %}
+                    <img
+                      class="thumb"
+                      src="data:image/svg+xml;utf8,{{ '<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect width=%2264%22 height=%2264%22 rx=%2210%22 fill=%22%23e9ecef%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2210%22 fill=%22%236c757d%22>no img</text></svg>'|e('url') }}"
+                      alt="Pas d'image"
+                    >
+                  {% endif %}
+                </td>
+                <td class="fw-semibold text-muted">{{ annonce.id }}</td>
+                <td class="fw-semibold">{{ annonce.titre }}</td>
+                <td class="text-truncate" style="max-width:480px">{{ annonce.description }}</td>
+                <td>
+                  {% if annonce.prix is not null %}
+                    <span class="badge bg-success-subtle text-success badge-price">
+                      {{ annonce.prix|number_format(2, ',', ' ') }} €
+                    </span>
+                  {% else %}
+                    <span class="badge bg-secondary-subtle text-secondary">N/C</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-primary action-btn"
+                     href="{{ path('app_annonces_show', {'id': annonce.id}) }}">👁️ Show</a>
+                  <a class="btn btn-sm btn-primary action-btn"
+                     href="{{ path('app_annonces_edit', {'id': annonce.id}) }}">✏️ Edit</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6">
+                  <div class="empty">
+                    <div class="display-6 mb-2">😕</div>
+                    <p class="mb-3">Aucune annonce pour le moment.</p>
+                    <a class="btn btn-primary" href="{{ path('app_annonces_new') }}">Créer la première annonce</a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const table  = document.getElementById('annoncesTable');
+      const tbody  = table?.querySelector('tbody');
+      const rows   = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
+      const search = document.getElementById('searchInput');
+      const sort   = document.getElementById('sortSelect');
+      const count  = document.getElementById('countVisible');
+
+      function apply(){
+        const q = (search?.value || '').toLowerCase().trim();
+
+        // Filtre via data-*
+        let visible = rows.filter(r=>{
+          const cells = r.querySelectorAll('td');
+          if(!cells.length) return true; // conserve l'état vide
+          if(!q) return true;
+          return (r.dataset.titre || '').includes(q) || (r.dataset.description || '').includes(q);
+        });
+
+        // Tri via data-*
+        const mode = sort?.value || '';
+        if(mode){
+          visible = visible.slice().sort((a,b)=>{
+            if(mode==='prix_asc')  return (+a.dataset.prix || 0) - (+b.dataset.prix || 0);
+            if(mode==='prix_desc') return (+b.dataset.prix || 0) - (+a.dataset.prix || 0);
+            if(mode==='titre_asc') return (a.dataset.titre > b.dataset.titre) ? 1 : -1;
+            if(mode==='titre_desc')return (a.dataset.titre < b.dataset.titre) ? 1 : -1;
+            return 0;
+          });
+        }
+
+        // Render
+        if(tbody){
+          tbody.innerHTML = '';
+          if(visible.length){
+            visible.forEach(r=>tbody.appendChild(r));
+          } else {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td colspan="6">
+              <div class="empty">
+                <div class="display-6 mb-2">🔎</div>
+                <p class="mb-0">Aucune annonce ne correspond à votre recherche.</p>
+              </div>
+            </td>`;
+            tbody.appendChild(tr);
+          }
+        }
+
+        if(count){
+          const total = rows.filter(r=>r.querySelectorAll('td').length).length;
+          const shown = visible.filter(r=>r.querySelectorAll('td').length).length;
+          count.textContent = shown + ' / ' + total + ' visible(s)';
+        }
+      }
+
+      if(search) search.addEventListener('input', apply);
+      if(sort)   sort.addEventListener('change', apply);
+      apply();
+    })();
+  </script>
+{% endblock %}
